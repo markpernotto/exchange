@@ -1,5 +1,5 @@
 # exchange
-A very simple Python API that returns static JSON data compiled from OpenExchangeRates.org. 
+A very simple Python API that returns static data compiled from OpenExchangeRates.org. 
 
 ## objective
 To setup an API that accepts 3 parameters: `source` identifies the source currency, `target` identifies the country we're exchanging our rate to, and `amount` is the amount of `source` currency we're looking to exchange. An optional, fourth parameter we'll accept is `date`, which is used to retrieve historical exchange rates.
