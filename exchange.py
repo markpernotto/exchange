@@ -62,13 +62,22 @@ def get_exchanges():
     source = request.args.get('source')
     amount = request.args.get('amount')
     target = request.args.get('target')
-    exchangeDate = request.args.get('date')
+
+    # are any of the minimum parameters not set?
+    if source is None or amount is None or target is None:
+        return 'minimum parameters are not set'
 
     for e in exchanges:
-        if e['source'] == source and e['target'] == target:
-            return str(e['exchange'] * int(amount))
-        else:
-            return "not found"
+        # make sure 'date' is a parameter and 'date' exists in our list
+        if 'date' in request.args and 'date' in e:
+            exchangeDate = request.args.get('date')
+            if e['date'] == exchangeDate and e['source'] == source and e['target'] == target:
+                return str(e['exchange'] * int(amount))
+        else: 
+            if e['source'] == source and e['target'] == target and 'date' not in e and 'date' not in request.args:
+                return str(e['exchange'] * int(amount))
+
+    return 'no exchanges found'
 
 if __name__ == '__main__':
     api.run()
