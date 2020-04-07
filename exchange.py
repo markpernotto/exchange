@@ -1,4 +1,5 @@
 from flask import Flask, json, request
+import datetime
 
 # crudely done to represent exchange rates by date
 exchanges = [
@@ -60,24 +61,55 @@ api = Flask(__name__)
 @api.route('/exchange', methods=['GET'])
 def get_exchanges():
     source = request.args.get('source')
-    amount = request.args.get('amount')
     target = request.args.get('target')
+    amount = request.args.get('amount')
+    exchangeDate = request.args.get('date')
 
-    # are any of the minimum parameters not set?
+    # validation tests
     if source is None or amount is None or target is None:
         return 'minimum parameters are not set'
 
-    for e in exchanges:
-        # make sure 'date' is a parameter and 'date' exists in our list
-        if 'date' in request.args and 'date' in e:
-            exchangeDate = request.args.get('date')
-            if e['date'] == exchangeDate and e['source'] == source and e['target'] == target:
-                return str(e['exchange'] * int(amount))
-        else: 
-            if e['source'] == source and e['target'] == target and 'date' not in e and 'date' not in request.args:
-                return str(e['exchange'] * int(amount))
+    _amount = validateAmount(amount)
+    _source = str(source) if len(str(source)) == 3 else False
+    _target = str(target) if len(str(target)) == 3 else False
+    _exchangeDate = validateDate(exchangeDate) 
+
+    if _amount == 0:
+        return 'amount must be greater than 0 to get rate'
+
+    if _exchangeDate is False:
+        return "date must be valid date in YYYY-MM-DD format"
+
+    # looping through our list
+    if _source is not False and _target is not False:
+        for e in exchanges:
+            if _exchangeDate is not None:
+                if 'date' in e:
+                    if e['date'] == _exchangeDate and e['source'] == _source and e['target'] == _target:
+                        return formatTargetAmount(e['exchange'], _amount)
+            else: 
+                if 'date' not in e:
+                    if e['source'] == _source and e['target'] == _target:
+                        return formatTargetAmount(e['exchange'], _amount)
 
     return 'no exchanges found'
+
+def validateAmount(amount):
+    try:
+        return float(amount)
+    except ValueError:
+        return 0
+
+def validateDate(exchangeDate):
+    try:
+        date = datetime.datetime.strptime(exchangeDate, '%Y-%m-%d')
+        date = str(date)
+        return date.split()[0]
+    except ValueError:
+        return False
+
+def formatTargetAmount(exchange, amount):
+    return str(exchange * amount)
 
 if __name__ == '__main__':
     api.run()
