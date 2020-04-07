@@ -70,15 +70,22 @@ def get_exchanges():
         return 'minimum parameters are not set'
 
     _amount = validateAmount(amount)
+    # TODO optionally compare with list of known exchanges
     _source = str(source) if len(str(source)) == 3 else False
     _target = str(target) if len(str(target)) == 3 else False
-    _exchangeDate = validateDate(exchangeDate) 
+
+    # checks after validation
+    if exchangeDate is not None:
+        _exchangeDate = validateDate(exchangeDate) 
+    else:
+        _exchangeDate = exchangeDate
 
     if _amount == 0:
         return 'amount must be greater than 0 to get rate'
 
     if _exchangeDate is False:
         return "date must be valid date in YYYY-MM-DD format"
+    # end validation tests
 
     # looping through our list
     if _source is not False and _target is not False:
@@ -109,6 +116,7 @@ def validateDate(exchangeDate):
         return False
 
 def formatTargetAmount(exchange, amount):
+    # TODO retrieve currency format from OER, toggle return via parameter
     return str(exchange * amount)
 
 if __name__ == '__main__':
